@@ -312,6 +312,9 @@ Zeyu Zhang, Haiying Shen, Shay Vargaftik, Ran Ben Basat, Michael Mitzenmacher, a
 Acceleration via Compression of the Key-Value Cache for Disaggregated LLM Inference. In 2026 ACM SIGOPS Annual
 Technical Conference (ATC '26).
 
+The artifact is archived on Zenodo: https://doi.org/10.5281/zenodo.22982679 (all versions; version 1.0.0 is
+https://doi.org/10.5281/zenodo.22982680).
+
 ## License
 
 Apache License 2.0, see `LICENSE`.
