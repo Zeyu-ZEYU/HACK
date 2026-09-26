@@ -1,0 +1,15 @@
+{
+  "title": "HACK: Homomorphic Acceleration via Compression of the Key-Value Cache for Disaggregated LLM Inference (artifact)",
+  "upload_type": "software",
+  "license": "Apache-2.0",
+  "creators": [
+    {"name": "Zhang, Zeyu", "affiliation": "University of Virginia"},
+    {"name": "Shen, Haiying", "affiliation": "University of Virginia"},
+    {"name": "Vargaftik, Shay", "affiliation": "VMware Research by Broadcom"},
+    {"name": "Ben Basat, Ran", "affiliation": "University College London and Broadcom"},
+    {"name": "Mitzenmacher, Michael", "affiliation": "Harvard University"},
+    {"name": "Yu, Minlan", "affiliation": "Harvard University"}
+  ],
+  "description": "Artifact of the ATC '26 paper \"HACK: Homomorphic Acceleration via Compression of the Key-Value Cache for Disaggregated LLM Inference\": the implementation of HACK (quantized KV cache, attention on 2-bit codes, Triton kernels, vLLM and Hugging Face integrations), the two comparison methods, the experiment scripts, tests and a Dockerfile. The README maps the components to the sections of the paper and gives the commands and expected results of every experiment.",
+  "keywords": ["LLM inference", "disaggregated serving", "KV cache", "quantization", "vLLM", "Triton"]
+}

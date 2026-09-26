@@ -143,7 +143,7 @@ GPUs, the network and the models used.
 | | Claim | Experiment | Expected result |
 |---|---|---|---|
 | C1 | The 2-bit KV cache needs about one sixth of the bytes of the BF16 KV cache, in GPU memory and on the network (Sec. 6.2). | E2, 5 minutes | 17.5% to 20.9% of the BF16 bytes for a 4096-token prompt, depending on the partition size. The numbers are deterministic. |
-| C2 | In disaggregated serving of long prompts, HACK lowers the average JCT, the tail JCT and the TTFT, and the gain grows with the request rate. It transfers about six times fewer KV bytes, and the decode instance needs several times less KV-cache memory (Sec. 6.2). | E3, long-context workload, 16 minutes | On two RTX A6000 GPUs: average JCT about 10% lower at 0.15 requests/s and about 30% lower at 0.3 requests/s, P99 JCT about 20% and 40% lower, TTFT about 40% and 45% lower, TPOT lower at 0.3 requests/s. Repeated runs differ by a few percentage points. |
+| C2 | In disaggregated serving of long prompts, HACK lowers the average JCT, the tail JCT and the TTFT, and the gain grows with the request rate. It transfers about six times fewer KV bytes, and the decode instance needs several times less KV-cache memory (Sec. 6.2). | E3, long-context workload, 16 minutes | On two RTX A6000 GPUs: average JCT about 12% lower at 0.15 requests/s and about 30% lower at 0.3 requests/s, P99 JCT about 22% and 44% lower, TTFT about 40% and 47% lower, TPOT lower at 0.3 requests/s. Repeated runs differ by a few percentage points. |
 | C3 | Requantization elimination is essential for the decode speed (Sec. 6.4). | E3, two runs of HACK with and without `--hack-option requant_elimination=0`, 7 minutes | Without requantization elimination the TPOT is more than five times higher. |
 | C4 | Attention on the codes is faster than BF16 attention on long KV caches, and faster than a FlashAttention-style kernel that dequantizes the same codes (Sec. 6.7). | E4, 10 minutes | On an RTX A6000: about 2x faster than BF16 at 4K tokens and about 3x from 32K tokens; 1.2x to 1.3x faster than the kernel with fused dequantization from 16K tokens. |
 | C5 | HACK keeps the accuracy of the BF16 KV cache on IMDb, arXiv, HumanEval and GSM8K (Sec. 6.3). | E1, quick check, 30 minutes | Every HACK row is within a few points of the baseline: at most 7 points with 30 examples per task, where one example is 3.3 points, and at most 4 points with 100 examples. It was within 2 points in our runs with 100 examples. |
@@ -197,9 +197,14 @@ python benchmarks/kv_size/kv_size.py --model Qwen/Qwen3-8B --prompt-tokens 4096 
 ```
 
 One GPU (20 GB for an 8B model), about 5 minutes. Prints the bytes of the stored KV cache and of the KV that is
-transferred from the prefill instance to the decode instance, absolute and relative to BF16. Measured for
-Qwen3-8B and a 4096-token prompt: BF16 576 MiB; HACK 121 / 102 / 101 MiB for Pi = 32 / 64 / 128 (20.9% / 17.7% /
-17.5% of BF16); KVQuant-style 84 MiB (14.6%); CacheGen-style 86 MiB transferred (14.9%) and 158 MiB stored (27.3%).
+transferred from the prefill instance to the decode instance, absolute and relative to BF16. For HACK the bytes count
+every stored tensor at its logical size: the 2-bit codes, the BF16 scale and minimum of every partition, the cached
+code sums, and the BF16 tail (the open block and the sink tokens); the unused capacity of the growable buffers of the
+reference cache is not counted. The vLLM integration stores the same fields in fixed-size pages, for Qwen3-8B 26,624 /
+43,008 / 77,824 bytes per block of Pi = 32 / 64 / 128 tokens against 131,072 / 262,144 / 524,288 bytes for BF16, so
+there the allocated size equals the logical size except for the last, partly filled block. Measured for Qwen3-8B and a
+4096-token prompt: BF16 576 MiB; HACK 121 / 102 / 101 MiB for Pi = 32 / 64 / 128 (20.9% / 17.7% / 17.5% of BF16);
+KVQuant-style 84 MiB (14.6%); CacheGen-style 86 MiB transferred (14.9%) and 158 MiB stored (27.3%).
 
 ### E3. Disaggregated serving (Sec. 6.2, 6.4, 6.5)
 
@@ -289,7 +294,8 @@ python benchmarks/microbench/plot_attn_microbench.py attn_microbench.json
 See `benchmarks/microbench/README.md`. One GPU with 2 GB of free memory; about 10 minutes including the search for
 the launch configurations. `bf16` is a FlashAttention-style kernel on a BF16 KV cache, `dequant` the same kernel with
 fused dequantization of 2-bit codes. One step at 128K tokens reads 84 MiB of KV with HACK and 512 MiB with BF16.
-Measured time per decode step in microseconds:
+The table reports the latency of the attention kernel per decode step in microseconds, the field `T_us` of the output
+file; `D_us` and `C_us` are the load-only and cache-resident variants described in `benchmarks/microbench/README.md`.
 
 | KV length | RTX A6000: HACK | BF16 | dequant | RTX 4000 Ada: HACK | BF16 | dequant | H200: HACK | BF16 | dequant |
 |---|---|---|---|---|---|---|---|---|---|
