@@ -306,6 +306,11 @@ file; `D_us` and `C_us` are the load-only and cache-resident variants described 
 | 64K | 121.7 | 383.2 | 155.4 | 168.5 | 808.3 | 209.8 | 67.8 | 75.8 | 66.2 |
 | 128K | 238.4 | 760.5 | 296.2 | 347.7 | 1610.3 | 425.2 | 127.1 | 138.0 | 125.2 |
 
+## Supplementary material
+
+[`docs/HACK_ATC26_Supplementary.pdf`](docs/HACK_ATC26_Supplementary.pdf) holds the per-dataset accuracy tables that
+supplement Section 6.3 of the ATC '26 paper.
+
 ## Citation
 
 Zeyu Zhang, Haiying Shen, Shay Vargaftik, Ran Ben Basat, Michael Mitzenmacher, and Minlan Yu. HACK: Homomorphic
